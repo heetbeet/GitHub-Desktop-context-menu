@@ -1,5 +1,5 @@
 # GitHub-Desktop-context-menu
-Run `GitHub Desktop context menu.cmd` to add a Github context menu to your explorer
+Run `GitHub Desktop context menu.cmd` from [the zip release](https://github.com/heetbeet/GitHub-Desktop-context-menu/archive/refs/tags/0.0.2.zip) to add a Github context menu to your explorer
 
 ![image](https://user-images.githubusercontent.com/4103775/125922374-0e0bde79-b349-4882-98bd-cd06e4bc680e.png)
 
