@@ -1,0 +1,156 @@
+@echo off
+SETLOCAL
+
+:: Use double slash \\ for .reg compatibility
+
+set "ghpath=%localappdata%\GitHubDesktop"
+set "ghpath=%ghpath:\=\\%"
+
+set ghbin=%ghpath%\\bin
+set ghexe=%ghpath%\\GitHubDesktop.exe
+set ghbat=%ghbin%\\github.bat
+
+set noshell=%ghbin%\\noshell.vbs
+set regcascade=%ghbin%\\github-context-menu--activate-choice.cmd
+set regsingle=%ghbin%\\github-context-menu--activate.cmd
+set regremove=%ghbin%\\github-context-menu--remove.cmd
+
+mkdir "%ghbin%" >nul 2>&1
+
+
+:: Create noshell.vbs in order to run github.bat silently (to avoid cmd window popup)
+echo 'from http://superuser.com/questions/140047                                                   >"%noshell%"
+echo If WScript.Arguments.Count ^>= 1 Then                                                        >>"%noshell%"
+echo     ReDim arr(WScript.Arguments.Count-1)                                                     >>"%noshell%"
+echo     For i = 0 To WScript.Arguments.Count-1                                                   >>"%noshell%"
+echo         Arg = WScript.Arguments(i)                                                           >>"%noshell%"
+echo         If InStr(Arg, " ") ^> 0 or InStr(Arg, "&") ^> 0 Then Arg = chr(34) ^& Arg ^& chr(34) >>"%noshell%"
+echo       arr(i) = Arg                                                                           >>"%noshell%"
+echo     Next                                                                                     >>"%noshell%"
+echo     RunCmd = Join(arr)                                                                       >>"%noshell%"
+echo     CreateObject("Wscript.Shell").Run RunCmd, 0 , True                                       >>"%noshell%"
+echo End If                                                                                       >>"%noshell%"
+
+
+:: Create scripts to remove all context menu entries
+echo @echo off                                                                                                   >"%regremove%"
+echo SETLOCAL                                                                                                   >>"%regremove%"
+echo reg delete "HKEY_CURRENT_USER\Software\Classes\Directory\shell\GitHubDesktopOpenWith" /f 2^>nul            >>"%regremove%"
+echo reg delete "HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\GitHubDesktopOpenWith" /f 2^>nul >>"%regremove%"
+
+
+:: Create scripts to apply GitHub context menu
+echo @echo off                                                                                                        >"%regsingle%"
+echo set "ghbin=%%~dp0"                                                                                              >>"%regsingle%"
+echo set "ghbin=%%ghbin:\=\\%%"                                                                                      >>"%regsingle%"
+echo set "ghexe=%%ghbin%%..\\GitHubDesktop.exe"                                                                      >>"%regsingle%"
+echo set "ghbat=%%ghbin%%github.bat"                                                                                 >>"%regsingle%"
+echo set "noshell=%%ghbin%%noshell.vbs"                                                                              >>"%regsingle%"
+echo:                                                                                                                >>"%regsingle%"
+echo call "%%~dp0\github-context-menu--remove.cmd"                                                                   >>"%regsingle%"
+echo:                                                                                                                >>"%regsingle%"
+echo set rtmp="%%temp%%\github-context-menu--activate.reg"                                                           >>"%regsingle%"
+echo:                                                                                                                >>"%regsingle%"
+echo echo Windows Registry Editor Version 5.00                                                            ^>%%rtmp%% >>"%regsingle%"
+echo echo:                                                                                              ^>^>%%rtmp%% >>"%regsingle%"
+echo echo ; Right click on explorer TREE                                                                ^>^>%%rtmp%% >>"%regsingle%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\shell\GitHubDesktopOpenWith]                    ^>^>%%rtmp%% >>"%regsingle%"
+echo echo @="Open with GitHub Desktop"                                                                  ^>^>%%rtmp%% >>"%regsingle%"
+echo echo "Icon"="%%ghexe%%,0"                                                                          ^>^>%%rtmp%% >>"%regsingle%"
+echo echo:                                                                                              ^>^>%%rtmp%% >>"%regsingle%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\shell\GitHubDesktopOpenWith\command]            ^>^>%%rtmp%% >>"%regsingle%"
+echo echo @="WScript \"%%noshell%%\" \"%%ghbat%%\" open \"%%%%1\""                                      ^>^>%%rtmp%% >>"%regsingle%"
+echo echo:                                                                                              ^>^>%%rtmp%% >>"%regsingle%"
+echo echo ; Right click on explorer main area                                                           ^>^>%%rtmp%% >>"%regsingle%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\GitHubDesktopOpenWith]         ^>^>%%rtmp%% >>"%regsingle%"
+echo echo @="Open with GitHub Desktop"                                                                  ^>^>%%rtmp%% >>"%regsingle%"
+echo echo "Icon"="%%ghexe%%,0"                                                                          ^>^>%%rtmp%% >>"%regsingle%"
+echo echo:                                                                                              ^>^>%%rtmp%% >>"%regsingle%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\GitHubDesktopOpenWith\command] ^>^>%%rtmp%% >>"%regsingle%"
+echo echo @="WScript \"%%noshell%%\" \"%%ghbat%%\" open \"%%%%V\""                                      ^>^>%%rtmp%% >>"%regsingle%"
+echo:                                                                                                                >>"%regsingle%"
+echo call reg import "%%rtmp%%"                                                                                      >>"%regsingle%"
+
+
+:: Create scripts to apply GitHub context menu
+echo @echo off                                                                                                                                     >"%regcascade%"
+echo set "ghbin=%%~dp0"                                                                                                                           >>"%regcascade%"
+echo set "ghbin=%%ghbin:\=\\%%"                                                                                                                   >>"%regcascade%"
+echo set "ghexe=%%ghbin%%..\\GitHubDesktop.exe"                                                                                                   >>"%regcascade%"
+echo set "ghbat=%%ghbin%%github.bat"                                                                                                              >>"%regcascade%"
+echo set "noshell=%%ghbin%%noshell.vbs"                                                                                                           >>"%regcascade%"
+echo:                                                                                                                                             >>"%regcascade%"
+echo call "%%~dp0\github-context-menu--remove.cmd"                                                                                                >>"%regcascade%"
+echo:                                                                                                                                             >>"%regcascade%"
+echo set rtmp="%%temp%%\github-context-menu--activate-choice.reg"                                                                                 >>"%regcascade%"
+echo:                                                                                                                                             >>"%regcascade%"
+echo echo Windows Registry Editor Version 5.00                                                                                         ^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo ; Top Level item in menu (right click on a folder)                                                                         ^>^>%%rtmp%% >>"%regcascade%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\shell\GitHubDesktopOpenWith]                                                 ^>^>%%rtmp%% >>"%regcascade%"
+echo echo "MUIVerb"="Open with GitHub Desktop"                                                                                       ^>^>%%rtmp%% >>"%regcascade%"
+echo echo "Icon"="%%ghexe%%,0"                                                                                                       ^>^>%%rtmp%% >>"%regcascade%"
+echo echo "subcommands"=""                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo ; First item in submenu                                                                                                    ^>^>%%rtmp%% >>"%regcascade%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\shell\GitHubDesktopOpenWith\shell\1GitHubDesktopOpenWith]                    ^>^>%%rtmp%% >>"%regcascade%"
+echo echo @="Open with GitHub Desktop"                                                                                               ^>^>%%rtmp%% >>"%regcascade%"
+echo echo "Icon"="%%ghexe%%,0"                                                                                                       ^>^>%%rtmp%% >>"%regcascade%"
+echo echo "CommandFlags"=dword:00000040                                                                                              ^>^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\shell\GitHubDesktopOpenWith\shell\1GitHubDesktopOpenWith\command]            ^>^>%%rtmp%% >>"%regcascade%"
+echo echo @="WScript \"%%noshell%%\" \"%%ghbat%%\" open \"%%%%1\""                                                                   ^>^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo ; Second item in submenu                                                                                                   ^>^>%%rtmp%% >>"%regcascade%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\shell\GitHubDesktopOpenWith\shell\2ApplyMenu]                                ^>^>%%rtmp%% >>"%regcascade%"
+echo echo @="Keep GitHub explorer menu entry"                                                                                        ^>^>%%rtmp%% >>"%regcascade%"
+echo echo "Icon"="SHELL32.dll,296"                                                                                                   ^>^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\shell\GitHubDesktopOpenWith\shell\2ApplyMenu\command]                        ^>^>%%rtmp%% >>"%regcascade%"
+echo echo @="WScript \"%%noshell%%\" \"%%ghbin%%github-context-menu--activate.cmd\""                                                 ^>^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo ; Third item in submenu                                                                                                    ^>^>%%rtmp%% >>"%regcascade%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\shell\GitHubDesktopOpenWith\shell\3RemoveMenu]                               ^>^>%%rtmp%% >>"%regcascade%"
+echo echo @="Discard GitHub explorer menu entry"                                                                                     ^>^>%%rtmp%% >>"%regcascade%"
+echo echo "Icon"="SHELL32.dll,131"                                                                                                   ^>^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\shell\GitHubDesktopOpenWith\shell\3RemoveMenu\command]                       ^>^>%%rtmp%% >>"%regcascade%"
+echo echo @="WScript \"%%noshell%%\" \"%%ghbin%%github-context-menu--remove.cmd\""                                                   ^>^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo ; Top Level item in menu  (right click within a folder)                                                                    ^>^>%%rtmp%% >>"%regcascade%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\GitHubDesktopOpenWith]                                      ^>^>%%rtmp%% >>"%regcascade%"
+echo echo "MUIVerb"="Open with GitHub Desktop"                                                                                       ^>^>%%rtmp%% >>"%regcascade%"
+echo echo "Icon"="%%ghexe%%,0"                                                                                                       ^>^>%%rtmp%% >>"%regcascade%"
+echo echo "subcommands"=""                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo ; First item in submenu                                                                                                    ^>^>%%rtmp%% >>"%regcascade%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\GitHubDesktopOpenWith\shell\1GitHubDesktopOpenWith]         ^>^>%%rtmp%% >>"%regcascade%"
+echo echo @="Open with GitHub Desktop"                                                                                               ^>^>%%rtmp%% >>"%regcascade%"
+echo echo "Icon"="%%ghexe%%,0"                                                                                                       ^>^>%%rtmp%% >>"%regcascade%"
+echo echo "CommandFlags"=dword:00000040                                                                                              ^>^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\GitHubDesktopOpenWith\shell\1GitHubDesktopOpenWith\command] ^>^>%%rtmp%% >>"%regcascade%"
+echo echo @="WScript \"%%noshell%%\" \"%%ghbin%%\" open \"%%%%V\""                                                                   ^>^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo ; Second item in submenu                                                                                                   ^>^>%%rtmp%% >>"%regcascade%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\GitHubDesktopOpenWith\shell\2ApplyMenu]                     ^>^>%%rtmp%% >>"%regcascade%"
+echo echo @="Keep GitHub explorer menu entry"                                                                                        ^>^>%%rtmp%% >>"%regcascade%"
+echo echo "Icon"="SHELL32.dll,296"                                                                                                   ^>^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\GitHubDesktopOpenWith\shell\2ApplyMenu\command]             ^>^>%%rtmp%% >>"%regcascade%"
+echo echo @="WScript \"%%noshell%%\" \"%%ghbin%%github-context-menu--activate.cmd\""                                                 ^>^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo ; Third item in submenu                                                                                                    ^>^>%%rtmp%% >>"%regcascade%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\GitHubDesktopOpenWith\shell\3RemoveMenu]                    ^>^>%%rtmp%% >>"%regcascade%"
+echo echo @="Discard GitHub explorer menu entry"                                                                                     ^>^>%%rtmp%% >>"%regcascade%"
+echo echo "Icon"="SHELL32.dll,131"                                                                                                   ^>^>%%rtmp%% >>"%regcascade%"
+echo echo:                                                                                                                           ^>^>%%rtmp%% >>"%regcascade%"
+echo echo [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\GitHubDesktopOpenWith\shell\3RemoveMenu\command]            ^>^>%%rtmp%% >>"%regcascade%"
+echo echo @="WScript \"%%noshell%%\" \"%%ghbin%%github-context-menu--remove.cmd\""                                                   ^>^>%%rtmp%% >>"%regcascade%"
+echo:                                                                                                                                             >>"%regcascade%"
+echo call reg import "%%rtmp%%"                                                                                                                   >>"%regcascade%"
+
+
+call "%regcascade%"
