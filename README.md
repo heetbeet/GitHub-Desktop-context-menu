@@ -6,4 +6,6 @@ Run `Add GitHub-Desktop context menu.cmd` or `Remove GitHub-Desktop context menu
 
 # Run via a quick command
 
+You can copy and paste the following into your terminal to automatically run the command
+
     powershell -nop -c "Invoke-WebRequest -Uri 'https://github.com/heetbeet/GitHub-Desktop-context-menu/raw/main/Add%20GitHub-Desktop%20context%20menu.cmd' -OutFile $env:Temp/_.bat; Start-Process $env:Temp/_.bat"
