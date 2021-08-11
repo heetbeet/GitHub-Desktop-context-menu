@@ -10,8 +10,8 @@ Copy `Ctrl+c` and paste `Ctrl+v` the following code into your run box `⊞+r` or
 
 ### + add
 
-    powershell -nop -c "Invoke-WebRequest -Uri 'https://github.com/heetbeet/GitHub-Desktop-context-menu/raw/main/Add%20GitHub-Desktop%20context%20menu.cmd' -OutFile $env:Temp/_.bat; Start-Process $env:Temp/_.bat"
+    powershell -nop -c "Invoke-WebRequest -Uri 'https://github.com/heetbeet/GitHub-Desktop-context-menu/raw/main/Add%20GitHub-Desktop%20context%20menu.cmd' -OutFile $env:Temp/_.cmd; Start-Process $env:Temp/_.cmd"
 
 ### - remove
 
-    powershell -nop -c "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/heetbeet/GitHub-Desktop-context-menu/main/Remove%20GitHub-Desktop%20context%20menu.cmd' -OutFile $env:Temp/_.bat; Start-Process $env:Temp/_.bat"
+    powershell -nop -c "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/heetbeet/GitHub-Desktop-context-menu/main/Remove%20GitHub-Desktop%20context%20menu.cmd' -OutFile $env:Temp/_.cmd; Start-Process $env:Temp/_.cmd"
