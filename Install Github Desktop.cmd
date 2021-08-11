@@ -3,6 +3,8 @@
 @type "%cmdfile%" | powershell -NoP - &exit /b %errorlevel%
 #>
 
+Echo Download and Install Github-Desktop from central.github.com/deployments/desktop/desktop/latest/win32
+
 Invoke-WebRequest -Uri 'https://central.github.com/deployments/desktop/desktop/latest/win32' -OutFile "$env:Temp/github-desktop.exe"
 Invoke-WebRequest -Uri 'https://github.com/heetbeet/GitHub-Desktop-context-menu/raw/main/Add%20GitHub-Desktop%20context%20menu.cmd' -OutFile "$env:Temp/add-context-menu.cmd"
 
