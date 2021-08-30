@@ -1,8 +1,7 @@
-@{' 2>nul&::'=''}>$nul <#
-@echo off &setlocal &set "cmdfile=%~dp0%~n0.cmd"
-@type "%cmdfile%" | powershell -NoP - 
-if /i "%comspec% /c ``%~0` `" equ "%cmdcmdline:"=`%" pause
-exit /b %errorlevel%
+<# :
+    @type "%~f0" | powershell -NoP - 
+    @if /i "%comspec% /c ``%~0` `" equ "%cmdcmdline:"=`%" @pause
+    @goto :eof
 #>
 
 Echo 'Download and Install Github-Desktop from `central.github.com/deployments/desktop/desktop/latest/win32`'
